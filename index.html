@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+        <title>Portfolio</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="styles.css">
+        <script src="experienceList.js"></script>
+
+    </head>
+    
+    <body>
+
+    <div class="wrap">
+    <header class="top">
+        <p class="kicker">PORTFOLIO — 2026</p>
+        <h1 class="name">Shaya Jabbarzadeh</h1>
+        <p class="tagline">Software by day, Hardware by night. I like building things where the hardware and the code both matter.</p>
+        <div class="contact-row">
+        <a href="mailto:shayajabbarzadeh@gmail.com">shayajabbarzadeh@gmail.com</a>
+        <a href="https://github.com/ThereIsNoCode" target="_blank" rel="noopener">github.com/ThereIsNoCode</a>
+        <a href="https://www.linkedin.com/in/shaya-jabbarzadeh-44b8293ab/" target="_blank" rel="noopener">linkedin.com/in/shaya-jabbarzadeh-44b8293ab</a>
+        </div>
+    </header>
+
+    <nav class="filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="project">Projects</button>
+        <button class="filter-btn" data-filter="lab">University Labs</button>
+        <button class="filter-btn" data-filter="job">Experience</button>
+    </nav>
+
+    <main id="entries"></main>
+
+    <footer class="bottom">
+        Built and maintained by hand. Last updated 2026.
+    </footer>
+    </div>
+
+    <script>
+    /* ============================================================
+    ENTRY DATA
+    ------------------------------------------------------------
+    This is the ONLY section you need to touch to add new work.
+    Copy one object below, paste it into the array, edit the
+    fields, done — the page re-renders automatically.
+
+    Fields:
+        type      : "project" | "lab"
+        title     : string
+        year      : string, e.g. "2026" or "Spring 2026"
+        course    : optional, only for labs, e.g. "CS 350 — Operating Systems"
+        stack     : array of strings, e.g. ["Python", "PyTorch"]
+        summary   : 1-3 sentence description of what it is / does
+        highlights: array of short bullet strings (what you did, results,
+                    what you learned — 2 to 4 is a good number)
+        links     : optional array of {label, url} — omit or leave [] if
+                    you have nothing to link (typical for labs)
+        noSource  : optional bool — set true to show a small note
+                    explaining source isn't public (nice for labs)
+    ============================================================ */
+
+
+    /* ============================================================
+        RENDERING — no need to edit below this line
+    ============================================================ */
+
+    function escapeHtml(str) {
+        const div = document.createElement("div");
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function renderEntry(e) {
+        const tagLabel = e.type === "lab" ? "University Lab" : e.type === "job" ? "Experience" : "Project";
+        const course = e.course ? `<p class="course">${escapeHtml(e.course)}</p>` : "";
+        const stack = (e.stack || []).map(s => `<span class="stack-chip">${escapeHtml(s)}</span>`).join("");
+        const highlights = (e.highlights || []).map(h => `<li>${escapeHtml(h)}</li>`).join("");
+
+        const video = e.video
+            ? (() => {
+                const v = typeof e.video === "string" ? { label: "Watch demo", url: e.video } : e.video;
+                return `<a class="video-link" href="${escapeHtml(v.url)}" target="_blank" rel="noopener">▶ ${escapeHtml(v.label || "Watch demo")}</a>`;
+            })()
+            : "";
+
+        const links = (e.links && e.links.length)
+            ? `<div class="links-row">${video}${e.links.map(l => `<a href="${escapeHtml(l.url)}" target="_blank" rel="noopener">${escapeHtml(l.label)} ↗</a>`).join("")}</div>`
+            : (video
+                ? `<div class="links-row">${video}</div>`
+                : (e.noSource ? `<p class="no-source-note">Source not publicly available (university coursework).</p>` : ""));
+
+        return `
+        <article class="entry" data-type="${e.type}">
+            <div class="entry-meta">
+            <span class="year">${escapeHtml(e.year)}</span>
+            <span class="tag ${e.type}">${tagLabel}</span>
+            </div>
+            <div class="entry-body">
+            <h2>${escapeHtml(e.title)}</h2>
+            ${course}
+            <p class="summary">${escapeHtml(e.summary)}</p>
+            ${highlights ? `<ul class="highlights">${highlights}</ul>` : ""}
+            ${stack ? `<div class="stack-row">${stack}</div>` : ""}
+            ${links}
+            </div>
+        </article>
+        `;
+    }
+
+    function render(filter) {
+        const container = document.getElementById("entries");
+        const items = filter === "all" ? entries : entries.filter(e => e.type === filter);
+        container.innerHTML = items.map(renderEntry).join("");
+    }
+
+    document.querySelectorAll(".filter-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+        document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        render(btn.dataset.filter);
+        });
+    });
+
+    render("all");
+    </script>
+
+    </body>
+</html>
